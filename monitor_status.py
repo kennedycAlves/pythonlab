@@ -7,7 +7,7 @@ import mysql.connector
 from mysql.connector import errorcode
 from time import sleep
 
-con = mysql.connector.connect(user='root', password='1q2w3e4r,', host='127.0.0.1', database='status_licitacao')
+con = mysql.connector.connect(user='', password='', host='127.0.0.1', database='status_licitacao')
 
 
 browser = webdriver.Firefox()  
