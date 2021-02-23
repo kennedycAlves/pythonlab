@@ -9,7 +9,7 @@ from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 
 
-con = mysql.connector.connect(user='root', password='1q2w3e4r,', host='127.0.0.1', database='comprasnet')
+con = mysql.connector.connect(user='', password='', host='127.0.0.1', database='comprasnet')
 '''
 except mysql.connector.Error as erro:
     if erro.errno == errorcode.ER_ACCESS_DENIED_ERROR:
