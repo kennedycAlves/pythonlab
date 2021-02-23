@@ -2,7 +2,7 @@ import mysql.connector
 from mysql.connector import errorcode
 
 try:
-    con = mysql.connector.connect(user='root', password='1q2w3e4r,', host='127.0.0.1', database='comprasnet')
+    con = mysql.connector.connect(user='', password='', host='127.0.0.1', database='comprasnet')
     cursor = con.cursor()
     
     sql = "SELECT ar.nome_interesse, ar.cliente_id, ch.nome_chave FROM comprasnet.areainteresses as ar \
