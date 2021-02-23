@@ -7,7 +7,7 @@ from mysql.connector import errorcode
 
 
 try:
-    con = mysql.connector.connect(user='root', password='123456', host='127.0.0.1', database='comprasnet')
+    con = mysql.connector.connect(user='', password='', host='127.0.0.1', database='comprasnet')
 except mysql.connector.Error as erro:
     if erro.errno == errorcode.ER_ACCESS_DENIED_ERROR:
         print("Usuário ou senha inválidos")
