@@ -21,7 +21,10 @@ numprp = browser.find_element_by_id("numprp")
 lstSituacao = browser.find_element_by_id("lstSituacao")
 ok = browser.find_element_by_id("ok")
 
+#Usasg
 teste = '925373'
+
+#N° Pregão
 teste2 = '2802020'
 lstSituacao.send_keys("Todas")
 codUasg.send_keys(teste)
