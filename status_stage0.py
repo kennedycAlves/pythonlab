@@ -44,6 +44,10 @@ original_window = browser.current_window_handle
 
 dados = browser.find_element_by_partial_link_text('22021')
 esclarecimentos = browser.find_element_by_partial_link_text('Esclarecimentos')
+# try:
+impugnacao = browser.find_element_by_partial_link_text('Impugnações')
+# except:
+    # print("Sem impugnações no momento")
 
 split_tag = tag.split("\n")
 
@@ -87,6 +91,14 @@ print(popup_window)
 browser.switch_to.window(popup_window[2])
 url_esclarecimentos = browser.current_url
 sleep(3)
+# try: 
+# impugnacao.click()
+# popup_window = browser.window_handles
+# browser.switch_to.window(popup_window[3])
+# url_impugnacao = browser.current_url
+# except:
+#     print("sem impugnações")
+
 # texto = urlopen(url_esclarecimentos).read()
 # print(texto)
 
@@ -94,24 +106,51 @@ def convert(list):
     return tuple(i for i in list) 
 
 def soupMount(url):
-    html = urlopen(url)
-    soup = BeautifulSoup(html, "html.parser")
-    return soup
+    try:
+        html = urlopen(url)
+        soup = BeautifulSoup(html, "html.parser")
+        return soup
+    except:
+        print("Url não disponível no momento")
 
-def inseriEsclarecimentos(idPregao):
+# def inseriImpugnacoes(idPregao):
+#     texto = str(soupMount(url_impugnacao))
+#     split_texto = texto.split("\n")
+#     print(split_texto)
+
+def inseriInformacoes(idPregao, tipo):
+    
+    tipo_informacao = ""
+
+    if(tipo == "E"):
+       tipo_informacao = "Esclarecimento"
+    
+    if(tipo == "I"):
+       tipo_informacao = "Impugnacao"
+    
+    if(tipo == "A"):
+        tipo_informacao = "Avisos"
+    
+    if(tipo == "T"):
+        tipo_informacao = "teste"
+
+
+
+
     texto = str(soupMount(url_esclarecimentos))
     split_texto = texto.split("\n")
-    url_avisos1_part1 = 'http://comprasnet.gov.br/livre/Pregao/'+split_texto[94][-39:-13]
-    url_avisos1_completa = url_avisos1_part1 + split_texto[94][-9:-3]
+    url_informações_pregao = 'http://comprasnet.gov.br/livre/Pregao/'+split_texto[94][-39:-13]+'Tipo='+tipo
+    # url_avisos1_completa = url_avisos1_part1 + split_texto[94][-9:-3]
 
-    texto2_soup = soupMount(url_avisos1_completa)
+    texto2_soup = soupMount(url_informações_pregao)
 
     esclarecimentos_data =  texto2_soup.select('.mensagem2')
 
-    cursor.execute("SELECT data_esclarecimento FROM esclarecimentos WHERE id_pregao LIKE('%s')" % (idPregao))
+    cursor.execute("SELECT data_informacao FROM informacoes WHERE id_pregao LIKE('%s') AND tipo_informacao LIKE('%s')" % (idPregao,tipo_informacao))
     datas = cursor.fetchall()
     lista = list()
-    
+
+
     for linha in esclarecimentos_data:
 
         data = str(linha)
@@ -130,18 +169,32 @@ def inseriEsclarecimentos(idPregao):
             if(format_data not in tuple(lista)):
             
             
-                sql2 = "INSERT INTO esclarecimentos(id_pregao, data_esclarecimento, link ) VALUES(%s,%s,%s)"
-                cursor.execute(sql2, (idPregao, format_data, url_avisos1_completa))
+                sql2 = "INSERT INTO informacoes(id_pregao, data_informacao, tipo_informacao, link ) VALUES(%s,%s,%s,%s)"
+                cursor.execute(sql2, (idPregao, format_data, tipo_informacao, url_informações_pregao))
 
                      
         else:
             print("novo")
             print(format_data)
-            sql2 = "INSERT INTO esclarecimentos(id_pregao, data_esclarecimento, link ) VALUES(%s,%s,%s)"
-            cursor.execute(sql2, (idPregao, format_data, url_avisos1_completa))
+            sql2 = "INSERT INTO informacoes(id_pregao, data_informacao, tipo_informacao, link ) VALUES(%s,%s,%s,%s)"
+            cursor.execute(sql2, (idPregao, format_data, tipo_informacao, url_informações_pregao))
+
+
+    
 
     con.commit() 
 
+def verificaFimEnvioPropostas(idPregao):
+    cursor.execute("SELECT fim_envio_propostas FROM pregao WHERE id LIKE('%s')" % (idPregao))
+    data = cursor.fetchone()
+    valida_envio_propostas = data[0]
+    if(valida_envio_propostas != fim_envio_propostas):
+
+        
+        cursor.execute("UPDATE pregao SET fim_envio_propostas = ('%s') WHERE id = %s" % (fim_envio_propostas, idPregao))
+        
+        con.commit() 
+    
 
 
 cursor = con.cursor()
@@ -156,7 +209,13 @@ if(len(select_pregao_uasg) > 0):
     # print("registro encontrado")
     tratamento = select_pregao_uasg[0]
     valida_id_pregao = tratamento[2]
-    inseriEsclarecimentos(valida_id_pregao)
+    inseriInformacoes(valida_id_pregao, "C")
+    inseriInformacoes(valida_id_pregao, "E")
+    inseriInformacoes(valida_id_pregao, "I")
+    inseriInformacoes(valida_id_pregao, "C")
+    inseriInformacoes(valida_id_pregao, "A")
+    
+    verificaFimEnvioPropostas(valida_id_pregao)
     
 else:
 
@@ -175,5 +234,8 @@ else:
     pregao_id = select_pregao_id[0]
 
 
-
-    inseriEsclarecimentos(pregao_id)
+    inseriInformacoes(pregao_id, "E")
+    inseriInformacoes(pregao_id, "I")
+    inseriInformacoes(pregao_id, "C")
+    inseriInformacoes(pregao_id, "A")
+    
